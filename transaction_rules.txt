@@ -3,6 +3,19 @@
 # The system will check if the transaction title contains any of these strings
 # If found, it will use the specified category instead of asking the AI
 
+# Category Descriptions (used by AI for better categorization)
+# CATEGORY_DESC: Transportation | Public transit, rideshare, gas, parking, car maintenance
+# CATEGORY_DESC: Groceries | Food shopping, supermarkets, farmers markets, meal ingredients
+# CATEGORY_DESC: Cafe | Coffee shops, cafes, places for work or casual meetings
+# CATEGORY_DESC: Eating Out | Restaurants, fast food, takeout, dining experiences
+# CATEGORY_DESC: Subscription | Recurring bills and subscriptions (streaming, gym, phone, etc.)
+# CATEGORY_DESC: Partying | Alcohol purchases, bars, clubs, nightlife activities
+# CATEGORY_DESC: Clothing | Clothing stores, fashion, apparel, shoes, accessories
+# CATEGORY_DESC: Technology | Tech purchases, electronics, software, gadgets
+# CATEGORY_DESC: Events | Event tickets, entertainment, concerts, shows, activities
+# CATEGORY_DESC: Vanity | Beauty, grooming, personal care, cosmetics, spa treatments
+# CATEGORY_DESC: Misc | Anything that doesn't fit other categories
+
 # Transportation
 PRESTO FARE -> Transportation
 TTC -> Transportation

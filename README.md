@@ -12,12 +12,22 @@ Transform your RBC credit card transactions from QFX files into a beautifully or
 ## ✨ Features
 
 - 🔍 **Smart QFX Parsing** - Extracts DEBIT transactions from RBC QFX files
-- 🧠 **Hybrid AI Categorization** - Rule-based + AI-powered classification
+- 🧠 **Hybrid AI Categorization** - Rule-based + AI-powered classification with dynamic category discovery
 - 📊 **Notion Integration** - Seamless database sync with duplicate protection
 - 🎯 **Interactive Model Selection** - Choose your preferred Ollama model
 - ⚡ **Pattern Learning** - Automatically adds new rules from manual categorizations
 - 🛡️ **Duplicate Prevention** - Smart transaction ID checking
 - 📈 **Confidence Scoring** - AI provides confidence levels for uncertain categorizations
+- 🏷️ **Dynamic Categories** - Automatically discovers categories from rules + supports custom categories
+- 📝 **Rich Descriptions** - Category descriptions improve AI accuracy and user understanding
+
+## 🚀 Recent Improvements
+
+- ✨ **Smart Category Discovery** - No more hardcoded categories! System automatically finds all categories from your rules
+- 🎯 **Enhanced AI Prompts** - AI now uses rich category descriptions for more accurate categorization
+- 📝 **Integrated Descriptions** - Category descriptions and rules in single file for easier maintenance
+- 🎨 **Better UX** - Manual category selection shows descriptions for clearer decision-making
+- 🔄 **Dynamic Updates** - Add custom categories during runtime with automatic description prompting
 
 ## 🎬 Demo
 
@@ -29,7 +39,12 @@ Transform your RBC credit card transactions from QFX files into a beautifully or
 📋 Rule-based: PRESTO FARE -> Transportation ✅
 🤖 AI (85% confidence): MYSTERIOUS CAFE -> Cafe ✅
 ❓ Manual needed: UNKNOWN STORE (confidence: 65%)
-   Select category: 1-11 or type custom:
+   📋 Available categories:
+   1. Transportation - Public transit, rideshare, gas, parking, car maintenance
+   2. Cafe - Coffee shops, cafes, places for work or casual meetings
+   3. Custom_Business - Custom category for business expenses
+   4. Type custom category
+   Select category (1-4) or press Enter to use AI suggestion:
 
 📤 Uploading to Notion...
 ✅ 118 new transactions uploaded (2 duplicates skipped)
@@ -117,13 +132,13 @@ RBC-Notion-Sync/
 │   ├── notion_client.py       # Notion API integration
 │   └── transaction_categorizer.py  # AI + rule categorization
 ├── input/                     # Place QFX files here
-├── transaction_rules.txt      # Categorization rules (100+ patterns)
+├── transaction_rules.txt      # Categorization rules + descriptions
 └── requirements.txt          # Python dependencies
 ```
 
 ## 🧠 Intelligent Categorization System
 
-### Three-Tier Categorization
+### Four-Tier Smart Categorization
 
 1. **🎯 Rule-Based (Fastest)**
    ```
@@ -133,14 +148,20 @@ RBC-Notion-Sync/
    ```
 
 2. **🤖 AI-Powered (Smart)**
-   - Uses Ollama LLM for unknown merchants
+   - Uses Ollama LLM with rich category descriptions
    - Provides confidence scores (0-100%)
-   - Context-aware categorization
+   - Context-aware categorization with improved accuracy
 
-3. **👤 Human-in-the-Loop (Learning)**
-   - Manual categorization for low-confidence transactions
+3. **🏷️ Dynamic Category Discovery**
+   - Automatically discovers categories from rules file
+   - Supports custom categories with descriptions
+   - Categories update in real-time during session
+
+4. **👤 Human-in-the-Loop (Learning)**
+   - Manual categorization with description-enhanced selection
+   - Type custom category names or descriptions
    - Automatically extracts identifying patterns
-   - Adds new rules to `transaction_rules.txt`
+   - Adds new rules and descriptions to `transaction_rules.txt`
 
 ### Smart Pattern Extraction
 
@@ -170,25 +191,53 @@ Input:  "SUBWAY #40569 TORONTO"  → Output: "SUBWAY TORONTO"
 
 ## 🛠️ Advanced Configuration
 
-### Custom Categories
+### Dynamic Categories
 
-Add new categories by editing `transaction_categorizer.py`:
+The system automatically discovers categories from your `transaction_rules.txt` file. No code changes needed!
 
-```python
-self.categories = [
-    "Your_Custom_Category",
-    # ... existing categories
-]
-```
+**How it works:**
+- Categories are extracted from existing rules
+- Default categories are always available  
+- Custom categories are discovered and added automatically
+- AI prompts update to include all discovered categories
 
-### Custom Rules
+### Adding Custom Categories
+
+**Method 1: Through Manual Categorization**
+1. When categorizing manually, type a custom category name
+2. System prompts for description (optional)
+3. Category becomes available for future transactions
+
+**Method 2: Edit Rules File Directly**
 
 Edit `transaction_rules.txt`:
 
 ```
+# Add category descriptions (improves AI accuracy and user clarity)
+# CATEGORY_DESC: Your_Custom_Category | Description of what this category represents
+
+# Add rules for your custom category
 YOUR_MERCHANT -> Your_Custom_Category
 SPECIFIC_PATTERN -> Existing_Category
 ```
+
+### Category Descriptions
+
+Add descriptions in `transaction_rules.txt` using this format:
+
+```
+# CATEGORY_DESC: CategoryName | Description text here
+# CATEGORY_DESC: Transportation | Public transit, rideshare, gas, parking, car maintenance  
+# CATEGORY_DESC: Business_Meals | Work-related dining and client entertainment
+# CATEGORY_DESC: Home_Improvement | Hardware store, repairs, renovations
+```
+
+**Benefits:**
+- 🎯 **Better AI Accuracy** - Rich descriptions help AI make smarter categorization decisions
+- 👁️ **Clearer Selection** - Users see exactly what each category represents
+- 📁 **Single File** - All categorization data in one place for easy maintenance
+- 🤖 **Auto-Prompting** - System asks for descriptions when adding new categories
+- 🔄 **Dynamic Updates** - AI prompts automatically include new categories and descriptions
 
 ### Confidence Threshold
 

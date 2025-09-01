@@ -13,7 +13,8 @@ class TransactionCategorizer:
     def __init__(self, model_name: Optional[str] = None, confidence_threshold: float = 0.7):
         self.model_name = model_name
         self.confidence_threshold = confidence_threshold  # Threshold for auto-categorization
-        self.categories = [
+        # Default categories - will be extended with categories from rules file
+        self.default_categories = [
             "Partying",      # Alcohol/club/bar (LCBO, Fifth Social Club, Track & Field, etc.)
             "Groceries",     # Standard options (Loblaws, Whole Foods, Metro)
             "Misc",          # Anything not in other categories
@@ -27,20 +28,40 @@ class TransactionCategorizer:
             "Vanity"         # Beauty, grooming, personal care (Sephora, barber shops, etc.)
         ]
         
+        # Load rules and dynamically discover categories
+        self.rules, self.category_descriptions = self._load_categorization_rules()
+        self.categories = self._get_all_categories()
+        
         # If no model specified, prompt user to select one
         if not self.model_name:
             self.model_name = self._select_model_interactive()
-        
-        # Load categorization rules
-        self.rules = self._load_categorization_rules()
     
-    def _load_categorization_rules(self) -> Dict[str, str]:
+    def _load_categorization_rules(self) -> tuple[Dict[str, str], Dict[str, str]]:
         """
-        Load categorization rules from the rules file
-        Returns dict mapping search strings to categories
+        Load categorization rules and descriptions from the rules file
+        Returns (rules_dict, descriptions_dict)
         """
         rules = {}
+        descriptions = {}
         rules_file = Path(__file__).parent.parent / "transaction_rules.txt"
+        
+        # Default descriptions for built-in categories
+        default_descriptions = {
+            "Partying": "Alcohol purchases, bars, clubs, nightlife activities",
+            "Groceries": "Food shopping, supermarkets, farmers markets, meal ingredients",
+            "Misc": "Anything that doesn't fit other categories",
+            "Transportation": "Public transit, rideshare, gas, parking, car maintenance",
+            "Cafe": "Coffee shops, cafes, places for work or casual meetings",
+            "Eating Out": "Restaurants, fast food, takeout, dining experiences",
+            "Subscription": "Recurring bills and subscriptions (streaming, gym, phone, etc.)",
+            "Clothing": "Clothing stores, fashion, apparel, shoes, accessories",
+            "Technology": "Tech purchases, electronics, software, gadgets",
+            "Events": "Event tickets, entertainment, concerts, shows, activities",
+            "Vanity": "Beauty, grooming, personal care, cosmetics, spa treatments"
+        }
+        
+        # Start with default descriptions
+        descriptions.update(default_descriptions)
         
         try:
             if rules_file.exists():
@@ -48,8 +69,26 @@ class TransactionCategorizer:
                     for line_num, line in enumerate(f, 1):
                         line = line.strip()
                         
-                        # Skip empty lines and comments
-                        if not line or line.startswith('#'):
+                        # Skip empty lines
+                        if not line:
+                            continue
+                        
+                        # Parse category description: "# CATEGORY_DESC: CategoryName | Description"
+                        if line.startswith('# CATEGORY_DESC:'):
+                            desc_part = line.replace('# CATEGORY_DESC:', '').strip()
+                            if ' | ' in desc_part:
+                                category, description = desc_part.split(' | ', 1)
+                                category = category.strip()
+                                description = description.strip()
+                                
+                                if category and description:
+                                    descriptions[category] = description
+                            else:
+                                print(f"Warning: Invalid description format on line {line_num}: {line}")
+                            continue
+                        
+                        # Skip other comments
+                        if line.startswith('#'):
                             continue
                         
                         # Parse rule: "SEARCH_STRING -> CATEGORY"
@@ -64,13 +103,73 @@ class TransactionCategorizer:
                             print(f"Warning: Invalid rule format on line {line_num}: {line}")
                 
                 print(f"📋 Loaded {len(rules)} categorization rules")
+                custom_desc_count = len([k for k in descriptions.keys() if k not in default_descriptions])
+                if custom_desc_count > 0:
+                    print(f"📝 Loaded {custom_desc_count} custom category descriptions")
             else:
                 print(f"⚠️  Rules file not found: {rules_file}")
                 
         except Exception as e:
             print(f"❌ Error loading rules: {e}")
         
-        return rules
+        return rules, descriptions
+    
+    def _save_category_description(self, category: str, description: str):
+        """
+        Save a category description to the transaction_rules.txt file
+        """
+        rules_file = Path(__file__).parent.parent / "transaction_rules.txt"
+        
+        try:
+            # Check if description already exists
+            description_line = f"# CATEGORY_DESC: {category} | {description}"
+            existing_descriptions = set()
+            
+            if rules_file.exists():
+                with open(rules_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    
+                # Check if this category description already exists
+                for line in content.split('\n'):
+                    if line.startswith('# CATEGORY_DESC:'):
+                        desc_part = line.replace('# CATEGORY_DESC:', '').strip()
+                        if ' | ' in desc_part:
+                            cat, _ = desc_part.split(' | ', 1)
+                            existing_descriptions.add(cat.strip())
+                
+                # If category description doesn't exist, append it
+                if category not in existing_descriptions:
+                    with open(rules_file, 'a', encoding='utf-8') as f:
+                        f.write(f"\n{description_line}\n")
+                    print(f"✅ Saved description for '{category}' to {rules_file.name}")
+                else:
+                    print(f"ℹ️  Description for '{category}' already exists in {rules_file.name}")
+            
+        except Exception as e:
+            print(f"❌ Error saving category description: {e}")
+    
+    def _get_all_categories(self) -> List[str]:
+        """
+        Get all categories from default categories plus any new ones from rules file
+        """
+        # Start with default categories
+        all_categories = set(self.default_categories)
+        
+        # Add any categories found in rules that aren't in defaults
+        for category in self.rules.values():
+            all_categories.add(category)
+        
+        # Convert back to sorted list, putting default categories first
+        categories_list = []
+        for cat in self.default_categories:
+            if cat in all_categories:
+                categories_list.append(cat)
+                all_categories.remove(cat)
+        
+        # Add any new categories at the end
+        categories_list.extend(sorted(all_categories))
+        
+        return categories_list
     
     def _apply_rules(self, transaction: Dict) -> Optional[str]:
         """
@@ -124,11 +223,14 @@ class TransactionCategorizer:
         
         print(f"\n📋 Available categories:")
         for i, category in enumerate(self.categories, 1):
-            print(f"   {i}. {category}")
+            description = self.category_descriptions.get(category, "Custom category")
+            print(f"   {i}. {category} - {description}")
+        print(f"   {len(self.categories) + 1}. Type custom category")
         
         while True:
+            choice = ""
             try:
-                choice = input(f"\nSelect category (1-{len(self.categories)}) or press Enter to use AI suggestion: ").strip()
+                choice = input(f"\nSelect category (1-{len(self.categories) + 1}) or press Enter to use AI suggestion: ").strip()
                 
                 if not choice:
                     # User accepts AI suggestion
@@ -146,11 +248,70 @@ class TransactionCategorizer:
                         self._suggest_new_rule(transaction['title'], selected_category)
                     
                     return selected_category
+                elif choice_num == len(self.categories) + 1:
+                    # User wants to type a custom category
+                    custom_category = input("Enter custom category name: ").strip()
+                    if custom_category:
+                        print(f"Selected custom category: {custom_category}")
+                        
+                        # Add to our categories list for this session
+                        if custom_category not in self.categories:
+                            self.categories.append(custom_category)
+                            
+                            # Ask for description if not already defined
+                            if custom_category not in self.category_descriptions:
+                                description = input(f"Enter description for '{custom_category}' (optional): ").strip()
+                                if description:
+                                    self.category_descriptions[custom_category] = description
+                                    # Ask if they want to save this description
+                                    save_desc = input(f"Save this description to category_descriptions.txt? (y/N): ").strip().lower()
+                                    if save_desc == 'y':
+                                        self._save_category_description(custom_category, description)
+                                else:
+                                    self.category_descriptions[custom_category] = "Custom category"
+                        
+                        # Ask if they want to add this as a rule
+                        add_rule = input(f"Add '{transaction['title']}' -> '{custom_category}' as a rule? (y/N): ").strip().lower()
+                        if add_rule == 'y':
+                            self._suggest_new_rule(transaction['title'], custom_category)
+                        
+                        return custom_category
+                    else:
+                        print("Category name cannot be empty")
                 else:
-                    print(f"Please enter a number between 1 and {len(self.categories)}")
+                    print(f"Please enter a number between 1 and {len(self.categories) + 1}")
                     
             except ValueError:
-                print("Please enter a valid number")
+                # Check if user typed text instead of number (might be a category name)
+                if choice and choice.strip():
+                    # Treat as custom category input
+                    custom_category = choice.strip()
+                    print(f"Selected custom category: {custom_category}")
+                    
+                    # Add to our categories list for this session
+                    if custom_category not in self.categories:
+                        self.categories.append(custom_category)
+                        
+                        # Ask for description if not already defined
+                        if custom_category not in self.category_descriptions:
+                            description = input(f"Enter description for '{custom_category}' (optional): ").strip()
+                            if description:
+                                self.category_descriptions[custom_category] = description
+                                # Ask if they want to save this description
+                                save_desc = input(f"Save this description to category_descriptions.txt? (y/N): ").strip().lower()
+                                if save_desc == 'y':
+                                    self._save_category_description(custom_category, description)
+                            else:
+                                self.category_descriptions[custom_category] = "Custom category"
+                    
+                    # Ask if they want to add this as a rule
+                    add_rule = input(f"Add '{transaction['title']}' -> '{custom_category}' as a rule? (y/N): ").strip().lower()
+                    if add_rule == 'y':
+                        self._suggest_new_rule(transaction['title'], custom_category)
+                    
+                    return custom_category
+                else:
+                    print("Please enter a valid number or category name")
             except KeyboardInterrupt:
                 print(f"\nUsing AI suggestion: {ai_category}")
                 return ai_category
@@ -404,16 +565,16 @@ Identifying pattern:"""
         """
         Create a prompt for the LLM to categorize a transaction with confidence
         """
+        # Build categories list dynamically using descriptions
+        categories_text = ""
+        for category in self.categories:
+            description = self.category_descriptions.get(category, "Custom category")
+            categories_text += f"- {category}: {description}\n"
+        
         prompt = f"""You are a transaction categorization assistant. Given a credit card transaction, categorize it into one of these exact categories and provide a confidence score.
 
 Categories:
-- Partying: Alcohol, clubs, bars (e.g., LCBO, Fifth Social Club, Track & Field)
-- Groceries: Supermarkets and grocery stores (e.g., Loblaws, Whole Foods, Metro)
-- Transportation: Public transit, rideshare, transportation (e.g., TTC, Go Transit, Uber)
-- Cafe: Coffee shops and cafes for work or leisure
-- Eating Out: Restaurants, fast food, takeout
-- Subscription: Recurring bills and subscriptions (e.g., Equinox, Freedom Mobile, Disney+, ClassPass, Apple One)
-- Misc: Anything that doesn't fit other categories
+{categories_text.strip()}
 
 Transaction Details:
 - Name: {transaction['title']}
