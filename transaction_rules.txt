@@ -1,0 +1,136 @@
+# Transaction Categorization Rules
+# Format: "SEARCH_STRING" -> "CATEGORY"
+# The system will check if the transaction title contains any of these strings
+# If found, it will use the specified category instead of asking the AI
+
+# Transportation
+PRESTO FARE -> Transportation
+TTC -> Transportation
+UBER CANADA -> Transportation
+GO TRANSIT -> Transportation
+TAXI -> Transportation
+LYFT -> Transportation
+
+# Groceries  
+LOBLAWS -> Groceries
+METRO -> Groceries
+WHOLE FOODS -> Groceries
+SOBEYS -> Groceries
+FOOD BASICS -> Groceries
+NO FRILLS -> Groceries
+LONGOS -> Groceries
+FARM BOY -> Groceries
+SUPERSTORE -> Groceries
+VILLAGE MARKET -> Groceries
+SUMMERHILL MARKET -> Groceries
+GOLD LEAF FRUITS -> Groceries
+INS MARKET -> Groceries
+FRESHCO -> Groceries
+
+# Subscriptions
+FREEDOM MOBILE -> Subscription
+APPLE.COM/BILL -> Subscription
+CLASSPASS -> Subscription
+Disney Plus -> Subscription
+NETFLIX -> Subscription
+SPOTIFY -> Subscription
+Equinox -> Subscription
+ROGERS -> Subscription
+BELL CANADA -> Subscription
+TELUS -> Subscription
+
+# Partying (Alcohol/Bars/Clubs)
+LCBO -> Partying
+THE BEER STORE -> Partying
+WINE RACK -> Partying
+COCKTAIL BAR -> Partying
+FIFTH SOCIAL -> Partying
+TRACK & FIELD -> Partying
+PUB -> Partying
+BREWERY -> Partying
+DISTILLERY -> Partying
+
+# Coffee/Cafes
+STARBUCKS -> Cafe
+TIM HORTONS -> Cafe
+SECOND CUP -> Cafe
+COFFEE -> Cafe
+ESPRESSO -> Cafe
+CAFE -> Cafe
+ARTLY.COFFEE -> Cafe
+5 ELEMENTS ESPRESSO -> Cafe
+PROPELLER COFFEE -> Cafe
+AMADEUS PATISSERIE -> Cafe
+ANNEX ESPRESSO -> Cafe
+BELAIR COFFEE -> Cafe
+CARBONIC COFFEE -> Cafe
+FUTURE BISTRO -> Cafe
+COCO -> Cafe
+
+# Eating Out
+MCDONALD -> Eating Out
+BURGER KING -> Eating Out
+SUBWAY -> Eating Out
+PIZZA -> Eating Out
+RESTAURANT -> Eating Out
+RAMEN -> Eating Out
+SUSHI -> Eating Out
+DONBURI -> Eating Out
+BURGERS -> Eating Out
+EATALY -> Eating Out
+FAT PASHA -> Eating Out
+MANDYS -> Eating Out
+TST -> Eating Out
+TBJ CONCESSIONS -> Eating Out
+
+# Misc (known patterns that should be misc)
+AMAZON -> Misc
+DOLLARAMA -> Misc
+CANADIAN TIRE -> Misc
+WINNERS -> Misc
+MARSHALLS -> Misc
+STAPLES -> Misc
+HERBS &amp; NUTRITION -> Misc
+MUJI -> Misc
+Lush -> Misc
+
+# Clothing
+ZARA -> Clothing
+H&M -> Clothing
+UNIQLO -> Clothing
+BANANA REPUBLIC -> Clothing
+GAP -> Clothing
+OLD NAVY -> Clothing
+ARITZIA -> Clothing
+DOC MARTENS -> Clothing
+URBANOUTFITTERS -> Clothing
+
+# Technology
+APPLE STORE -> Technology
+BEST BUY -> Technology
+APPLE.COM/CA -> Technology
+APPLE -> Technology
+ALIEXPRESS -> Technology
+FUTURE SHOP -> Technology
+THE SOURCE -> Technology
+MICROSOFT -> Technology
+
+# Events
+EVENTBRITE -> Events
+TICKETMASTER -> Events
+CONCERT -> Events
+THEATRE -> Events
+CINEMA -> Events
+MOVIE -> Events
+
+# Vanity
+JAFET BARBER SHOP -> Vanity
+SEPHORA -> Vanity
+YESSTYLE -> Vanity
+ULTA -> Vanity
+SHOPPERS DRUG MART -> Vanity
+SALON -> Vanity
+SPA -> Vanity
+BARBERSHOP -> Vanity
+BARRYS CAN* -> Vanity
+OTHERSHIP -> Vanity
