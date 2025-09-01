@@ -210,14 +210,6 @@ python test_transaction_categorizer.py
 python test_full_integration.py
 ```
 
-## 📈 Performance
-
-- **Rule-based matching**: ~100 patterns, instant categorization
-- **AI categorization**: ~2-3 seconds per transaction (Llama 3.2)
-- **Notion upload**: ~500ms per transaction
-- **Duplicate checking**: ~200ms per transaction
-- **Memory usage**: ~200MB with loaded AI model
-
 ## 🤝 Contributing
 
 1. Fork the repository
