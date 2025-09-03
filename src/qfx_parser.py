@@ -19,7 +19,9 @@ class QFXParser:
         Parse OFX date format: YYYYMMDDHHMMSS[timezone]
         Example: 20250711120000[-5]
         
-        Properly handles timezone to ensure correct date representation
+        Applies timezone conversion and adds 1 day to correct QFX date discrepancy.
+        RBC QFX files consistently show dates 1 day behind the actual transaction dates
+        visible in the banking interface.
         """
         date_str = date_str.strip()
         
@@ -57,8 +59,14 @@ class QFXParser:
                 # Convert to local time to get the correct date
                 dt = dt.astimezone()
             
-            # Return just the date part at midnight in local timezone
-            return datetime(dt.year, dt.month, dt.day)
+            # Create date at midnight in local timezone
+            local_date = datetime(dt.year, dt.month, dt.day)
+            
+            # Add one day to correct QFX date discrepancy
+            # (QFX dates are consistently 1 day behind banking interface)
+            corrected_date = local_date + timedelta(days=1)
+            
+            return corrected_date
         else:
             raise ValueError(f"Invalid date format: {date_str}")
     
