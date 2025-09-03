@@ -3,11 +3,25 @@
 Full integration test for RBC-Notion-Sync
 """
 
-import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+import sys
+from pathlib import Path
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    # Look for .env file in the project root
+    env_path = Path(__file__).parent.parent / '.env'
+    load_dotenv(env_path)
+    if env_path.exists():
+        print(f"📄 Loaded environment variables from {env_path}")
+except ImportError:
+    # python-dotenv not installed, fallback to regular environment variables
+    pass
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from main import RBCNotionSync
+from test_utils import get_test_qfx_file, print_qfx_file_info
 
 def test_full_integration():
     print("🧪 Testing Full Integration (RBC-Notion-Sync)")
@@ -33,8 +47,21 @@ def test_full_integration():
     print("\n📁 Testing QFX Parser...")
     try:
         from qfx_parser import QFXParser
-        qfx_file = "/Users/romeluis/Library/Mobile Documents/com~apple~CloudDocs/Scripts/RBC-Notion-Sync/input/ofx32499.qfx"
-        parser = QFXParser(qfx_file)
+        
+        # Print info about available QFX files
+        if not print_qfx_file_info():
+            print("⚠️  Cannot test QFX parsing without files")
+            return False
+        
+        # Get the first available QFX file
+        qfx_file = get_test_qfx_file()
+        if not qfx_file:
+            print("❌ No QFX files found")
+            return False
+        
+        print(f"Using QFX file: {qfx_file.name}")
+        
+        parser = QFXParser(str(qfx_file))
         transactions = parser.parse_file()
         print(f"✅ QFX Parser: {len(transactions)} transactions parsed")
     except Exception as e:

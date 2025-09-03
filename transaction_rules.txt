@@ -107,6 +107,7 @@ HERBS &amp; NUTRITION -> Misc
 MUJI -> Misc
 Lush -> Misc
 
+OPENAI OPENAI.COM -> Misc
 # Clothing
 ZARA -> Clothing
 H&M -> Clothing

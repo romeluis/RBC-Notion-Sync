@@ -6,6 +6,17 @@ import os
 import requests
 from datetime import datetime
 from typing import Dict, List, Optional
+from pathlib import Path
+
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    # Look for .env file in the project root (parent of src directory)
+    env_path = Path(__file__).parent.parent / '.env'
+    load_dotenv(env_path)
+except ImportError:
+    # python-dotenv not installed, fallback to regular environment variables
+    pass
 
 
 class NotionClient:

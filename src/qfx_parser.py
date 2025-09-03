@@ -4,7 +4,7 @@ Parses OFX/QFX files and extracts transaction data using regex-based parsing
 """
 
 import re
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import List, Dict, Optional
 
 
@@ -18,15 +18,47 @@ class QFXParser:
         """
         Parse OFX date format: YYYYMMDDHHMMSS[timezone]
         Example: 20250711120000[-5]
-        """
-        # Remove timezone info if present
-        date_str = re.sub(r'\[.*\]', '', date_str.strip())
         
-        # Parse the date
+        Properly handles timezone to ensure correct date representation
+        """
+        date_str = date_str.strip()
+        
+        # Extract timezone offset if present
+        timezone_offset = 0
+        timezone_match = re.search(r'\[([+-]?\d+)\]', date_str)
+        if timezone_match:
+            timezone_offset = int(timezone_match.group(1))
+        
+        # Remove timezone info
+        date_str = re.sub(r'\[.*\]', '', date_str)
+        
+        # Parse the date and time
         if len(date_str) >= 8:
-            # Take first 8 characters for YYYYMMDD
+            # Extract date part (YYYYMMDD)
             date_part = date_str[:8]
-            return datetime.strptime(date_part, '%Y%m%d')
+            
+            # Extract time part if available (HHMMSS)
+            time_part = "000000"  # default to midnight
+            if len(date_str) >= 14:
+                time_part = date_str[8:14]
+            elif len(date_str) >= 12:
+                time_part = date_str[8:12] + "00"  # HHMM -> HHMMSS
+            elif len(date_str) >= 10:
+                time_part = date_str[8:10] + "0000"  # HH -> HHMMSS
+            
+            # Parse datetime
+            datetime_str = date_part + time_part
+            dt = datetime.strptime(datetime_str, '%Y%m%d%H%M%S')
+            
+            # Apply timezone offset to get the correct local date
+            if timezone_offset != 0:
+                tz = timezone(timedelta(hours=timezone_offset))
+                dt = dt.replace(tzinfo=tz)
+                # Convert to local time to get the correct date
+                dt = dt.astimezone()
+            
+            # Return just the date part at midnight in local timezone
+            return datetime(dt.year, dt.month, dt.day)
         else:
             raise ValueError(f"Invalid date format: {date_str}")
     

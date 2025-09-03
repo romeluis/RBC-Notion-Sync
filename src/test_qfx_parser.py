@@ -5,19 +5,29 @@ Test script for QFX parser
 
 import sys
 import os
+from pathlib import Path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from qfx_parser import QFXParser
+from test_utils import get_test_qfx_file, print_qfx_file_info
 
 def test_qfx_parser():
-    # Path to the QFX file
-    qfx_file = "/Users/romeluis/Library/Mobile Documents/com~apple~CloudDocs/Scripts/RBC-Notion-Sync/input/ofx32499.qfx"
-    
     print("Testing QFX Parser...")
-    print(f"File: {qfx_file}")
+    
+    # Print info about available QFX files
+    if not print_qfx_file_info():
+        return False
+    
+    # Get the first available QFX file
+    qfx_file = get_test_qfx_file()
+    if not qfx_file:
+        print("❌ No QFX files found")
+        return False
+    
+    print(f"Using file: {qfx_file.name}")
     
     # Create parser instance
-    parser = QFXParser(qfx_file)
+    parser = QFXParser(str(qfx_file))
     
     # Parse the file
     try:

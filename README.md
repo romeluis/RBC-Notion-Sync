@@ -106,7 +106,19 @@ Transform your RBC credit card transactions from QFX files into a beautifully or
 
 3. **Share database with integration** and copy the database ID
 
-4. **Set environment variables**
+4. **Set up environment variables**
+   
+   **Option A: Using .env file (Recommended)**
+   ```bash
+   # Copy the example file
+   cp .env.example .env
+   
+   # Edit .env with your credentials
+   # NOTION_API_KEY=your_integration_token_here
+   # NOTION_DATABASE_ID=your_database_id_here
+   ```
+   
+   **Option B: Using shell environment variables**
    ```bash
    export NOTION_API_KEY="your_integration_token"
    export NOTION_DATABASE_ID="your_database_id"
@@ -250,6 +262,9 @@ categorizer = TransactionCategorizer(confidence_threshold=0.8)  # Default: 0.7
 ## 🧪 Testing
 
 ```bash
+# Test environment setup
+python src/test_env_loading.py
+
 # Test individual components
 python test_qfx_parser.py
 python test_notion_client.py
@@ -271,11 +286,13 @@ python test_full_integration.py
 
 | Issue | Solution |
 |-------|----------|
+| **Environment variables not found** | Create `.env` file with your Notion credentials |
 | **Ollama connection failed** | Ensure `ollama serve` is running |
 | **Model not found** | Run `ollama pull llama3.2` |
 | **Notion 400 error** | Check API key and database schema |
 | **No transactions found** | Verify QFX files in `input/` directory |
 | **Duplicate uploads** | Check transaction ID format |
+| **.env file not loaded** | Run `python src/test_env_loading.py` to debug |
 
 ## 📄 License
 

@@ -9,6 +9,18 @@ import sys
 from pathlib import Path
 from typing import List
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    # Look for .env file in the project root
+    env_path = Path(__file__).parent.parent / '.env'
+    load_dotenv(env_path)
+    if env_path.exists():
+        print(f"📄 Loaded environment variables from {env_path}")
+except ImportError:
+    # python-dotenv not installed, fallback to regular environment variables
+    pass
+
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
